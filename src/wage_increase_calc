@@ -1,0 +1,116 @@
+#!/usr/bin/env php
+<?php
+# Supply 3 run time params: wage level, expected increase and month identifier,
+# Supply optional param 4 to indicate untaxable employer benefit
+#  (work clothes, pension insurance, ..)
+# Supply optional param 5 and 6 to indicate vacation's hourly rate and days
+#  spent having the vacation within the provided month
+# Supply 4th param DEBUG to get calculation details
+# for example: ./wage_increase_calc 25000 2000 2018-04 500 150 1 [DEBUG]
+if (count($argv) < 4) {
+    echo "Please provide input params!" . PHP_EOL;
+    exit(2);
+}
+
+define('DAY', 'P1D'); // 1-day interval
+define('HPD', 8); // hours-per-working-day official
+define('TAXRATE', 0.15); // global tax rate
+define('TAXLV', 2070); // tax leave monthly absolute TODO: really absolute?
+define('HLTSI', 0.09); // health insurance ratio employer
+define('SOCSI', 0.25); // social insurance ratio employer
+define('HLTRI', 0.045); // health insurance ratio employee
+define('SOCRI', 0.065); // social insurance ratio employee
+
+$nomiLvl = (int)$argv[1];
+$rgIncr = (int)$argv[2];
+$mon = $argv[3];
+
+// static addition to rough wage
+define('STADD', isset($argv[4]) ? (double)$argv[4] : 0);
+// rate per hour @ vacation
+define('VACRATE', isset($argv[5]) ? (double)$argv[5] : 0);
+// actual vacation utilization
+define('VACUTIL', isset($argv[6]) ? (int)$argv[6] : 0);
+// see details of calcualtion
+define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
+
+function daysCnt($month)
+{
+    static $cache;
+    if (empty($cache[$month])) {
+        $monSt = new \DateTime("${month}-01");
+        $cnt = cal_days_in_month(
+            CAL_GREGORIAN,
+            $monSt->format('m'),
+            $monSt->format('Y')
+        );
+        $monEn = new DateTime("${month}-{$cnt}");
+        $monEn = $monEn->add(new DateInterval(DAY));
+        $bdCnt = 0;
+        foreach (new DatePeriod($monSt, new DateInterval(DAY), $monEn) as $d) {
+            if ($d->format('N') < 6) {
+                ++$bdCnt;
+            }
+        }
+        $cache[$month] = $bdCnt;
+        if (DEBUG) {
+            echo "Working days: {$bdCnt}" . PHP_EOL;
+        }
+    }
+
+    return $cache[$month];
+}
+
+function realRoughWage($mon, $nomiLvl)
+{
+    for ($i = 0; $i < VACUTIL;) {
+        return ((daysCnt($mon) - VACUTIL) / daysCnt($mon) * $nomiLvl)
+            + (double) number_format(VACUTIL * HPD * VACRATE, 2, '.', '');
+    }
+    return $nomiLvl;
+}
+
+function superRough($rough)
+{
+    $add = 0;
+    foreach ([HLTSI, SOCSI] as $ins) {
+        $add += $ins * $rough;
+    }
+
+    return $rough + $add + STADD;
+}
+
+function taxReal($super)
+{
+    return TAXRATE * ($super - STADD) - TAXLV;
+}
+
+function pureWage($rough, $tax)
+{
+    return $rough - (HLTRI * $rough) - (SOCRI * $rough) - $tax;
+}
+
+function wrapper($nomiLvl, $mon)
+{
+    $a = realRoughWage($mon, $nomiLvl);
+    $b = superRough($a);
+    $c = taxReal($b);
+    $d = pureWage($a, $c);
+    if (DEBUG) {
+        echo "Super rough wage: {$b}" . PHP_EOL;
+        echo "Real rough wage: {$a}" . PHP_EOL;
+        echo "Real tax applied: {$c}" . PHP_EOL;
+        echo "Real pure wage: {$d}" . PHP_EOL;
+        for ($i = 0; $i < 80; $i++) {
+            echo "-";
+        }
+        echo PHP_EOL;
+    }
+
+    return $d;
+}
+
+$actual = wrapper($nomiLvl, $mon);
+$virtual = wrapper($nomiLvl + $rgIncr, $mon);
+echo "Pure wage difference: " . number_format($virtual - $actual, 2, '.', '');
+echo PHP_EOL;
