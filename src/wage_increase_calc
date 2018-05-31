@@ -38,13 +38,8 @@ function daysCnt($month)
 {
     static $cache;
     if (empty($cache[$month])) {
-        $monSt = new \DateTime("${month}-01");
-        $cnt = cal_days_in_month(
-            CAL_GREGORIAN,
-            $monSt->format('m'),
-            $monSt->format('Y')
-        );
-        $monEn = new DateTime("${month}-{$cnt}");
+        $monSt = new DateTime("${month}-01");
+        $monEn = new DateTime("${month}-{$monSt->format('t')}");
         $monEn = $monEn->add(new DateInterval(DAY));
         $bdCnt = 0;
         foreach (new DatePeriod($monSt, new DateInterval(DAY), $monEn) as $d) {
@@ -55,6 +50,7 @@ function daysCnt($month)
         $cache[$month] = $bdCnt;
         if (DEBUG) {
             echo "Working days: {$bdCnt}" . PHP_EOL;
+            echo "Vacation days: " . VACUTIL . PHP_EOL;
         }
     }
 
@@ -63,9 +59,10 @@ function daysCnt($month)
 
 function realRoughWage($mon, $nomiLvl)
 {
+    $monDayCnt = daysCnt($mon);
     for ($i = 0; $i < VACUTIL;) {
-        return ((daysCnt($mon) - VACUTIL) / daysCnt($mon) * $nomiLvl)
-            + (double) number_format(VACUTIL * HPD * VACRATE, 2, '.', '');
+        return (($monDayCnt - VACUTIL) / $monDayCnt * $nomiLvl)
+            + round(VACUTIL * HPD * VACRATE, 2);
     }
     return $nomiLvl;
 }
