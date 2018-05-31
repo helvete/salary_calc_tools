@@ -17,4 +17,3 @@ For example like this:
 * then follows the vacation hourly rate and vacation days utilized within the month of calculation. In case there is no vacation these can be omitted (optional)
 * input params validation is simple so just comply instead of quiche rant about runtime validation;-)
 * provide `DEBUG` 7th parameter in order to be printed calculation details
-* TODO? Find out how employee yearly discount actually works - it is hardcoded as of now, so the calculation can yield not-so-precise results for wages under ~ 13000. IMHO I think only actually taxed amount can be discounted, but am not really sure.
