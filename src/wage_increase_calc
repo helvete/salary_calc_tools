@@ -1,12 +1,6 @@
 #!/usr/bin/env php
 <?php
-# Supply 3 run time params: wage level, expected increase and month identifier,
-# Supply optional param 4 to indicate untaxable employer benefit
-#  (work clothes, pension insurance, ..)
-# Supply optional param 5 and 6 to indicate vacation's hourly rate and days
-#  spent having the vacation within the provided month
-# Supply 4th param DEBUG to get calculation details
-# for example: ./wage_increase_calc 25000 2000 2018-04 500 150 1 [DEBUG]
+# Example: ./wage_increase_calc 25000 2000 2018-04 [[[500] 150 1] [DEBUG]]
 if (count($argv) < 4) {
     echo "Please provide input params!" . PHP_EOL;
     exit(2);
