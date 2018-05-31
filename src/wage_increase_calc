@@ -15,7 +15,7 @@ if (count($argv) < 4) {
 define('DAY', 'P1D'); // 1-day interval
 define('HPD', 8); // hours-per-working-day official
 define('TAXRATE', 0.15); // global tax rate
-define('TAXLV', 2070); // tax leave monthly absolute TODO: really absolute?
+define('TAXLV', 2070); // tax leave monthly absolute (up to)
 define('HLTSI', 0.09); // health insurance ratio employer
 define('SOCSI', 0.25); // social insurance ratio employer
 define('HLTRI', 0.045); // health insurance ratio employee
@@ -82,7 +82,10 @@ function superRough($rough)
 
 function taxReal($super)
 {
-    return TAXRATE * ($super - STADD) - TAXLV;
+    $taxAdvance = TAXRATE * ($super - STADD) - TAXLV;
+    return $taxAdvance > 0
+        ? $taxAdvance
+        : 0;
 }
 
 function pureWage($rough, $tax)
