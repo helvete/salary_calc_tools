@@ -55,8 +55,10 @@ function realRoughWage($mon, $nomiLvl)
 {
     $monDayCnt = daysCnt($mon);
     for ($i = 0; $i < VACUTIL;) {
-        return (($monDayCnt - VACUTIL) / $monDayCnt * $nomiLvl)
-            + round(VACUTIL * HPD * VACRATE, 2);
+        $atWork = ($monDayCnt - VACUTIL) / $monDayCnt * $nomiLvl;
+        $onVac = round(VACUTIL * HPD * VACRATE, 2);
+
+        return round($atWork + $onVac);
     }
     return $nomiLvl;
 }
@@ -73,7 +75,7 @@ function superRough($rough)
 
 function taxReal($super)
 {
-    $taxAdvance = TAXRATE * ($super - STADD) - TAXLV;
+    $taxAdvance = TAXRATE * roundUpWhole($super - STADD, 100) - TAXLV;
     return $taxAdvance > 0
         ? $taxAdvance
         : 0;
@@ -81,7 +83,10 @@ function taxReal($super)
 
 function pureWage($rough, $tax)
 {
-    return $rough - (HLTRI * $rough) - (SOCRI * $rough) - $tax;
+    return $rough
+        - roundUpWhole(HLTRI * $rough, 1)
+        - roundUpWhole(SOCRI * $rough, 1)
+        - $tax;
 }
 
 function wrapper($nomiLvl, $mon)
@@ -102,6 +107,16 @@ function wrapper($nomiLvl, $mon)
     }
 
     return $d;
+}
+
+function roundUpWhole($roundee, $level)
+{
+    $roundeeCnt = (int)($roundee / $level);
+    if ($roundee / $level > $roundeeCnt) {
+        ++$roundeeCnt;
+    }
+
+    return $roundeeCnt * $level;
 }
 
 $actual = wrapper($nomiLvl, $mon);
