@@ -5,15 +5,7 @@ if (count($argv) < 4) {
     echo "Please provide input params!" . PHP_EOL;
     exit(2);
 }
-
-define('DAY', 'P1D'); // 1-day interval
-define('HPD', 8); // hours-per-working-day official
-define('TAXRATE', 0.15); // global tax rate
-define('TAXLV', 2070); // tax leave monthly absolute (up to)
-define('HLTSI', 0.09); // health insurance ratio employer
-define('SOCSI', 0.25); // social insurance ratio employer
-define('HLTRI', 0.045); // health insurance ratio employee
-define('SOCRI', 0.065); // social insurance ratio employee
+include(__DIR__ . '/WageCalc.php');
 
 $nomiLvl = (int)$argv[1];
 $rgIncr = (int)$argv[2];
@@ -28,98 +20,13 @@ define('VACUTIL', isset($argv[6]) ? (int)$argv[6] : 0);
 // see details of calcualtion
 define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
 
-function daysCnt($month)
-{
-    static $cache;
-    if (empty($cache[$month])) {
-        $monSt = new DateTime("${month}-01");
-        $monEn = new DateTime("${month}-{$monSt->format('t')}");
-        $monEn = $monEn->add(new DateInterval(DAY));
-        $bdCnt = 0;
-        foreach (new DatePeriod($monSt, new DateInterval(DAY), $monEn) as $d) {
-            if ($d->format('N') < 6) {
-                ++$bdCnt;
-            }
-        }
-        $cache[$month] = $bdCnt;
-        if (DEBUG) {
-            echo "Working days: {$bdCnt}" . PHP_EOL;
-            echo "Vacation days: " . VACUTIL . PHP_EOL;
-        }
-    }
+$calc = new \helvete\Tools\WageCalc(STADD, VACRATE, VACUTIL, DEBUG);
 
-    return $cache[$month];
+$actual = $calc->getDiff($nomiLvl, $mon);
+$virtual = $calc->getDiff($nomiLvl + $rgIncr, $mon);
+if (DEBUG) {
+    echo "Pure wage difference: " . number_format($virtual - $actual, 2, '.', '');
+} else {
+    echo $virtual - $actual;
 }
-
-function realRoughWage($mon, $nomiLvl)
-{
-    $monDayCnt = daysCnt($mon);
-    for ($i = 0; $i < VACUTIL;) {
-        $atWork = ($monDayCnt - VACUTIL) / $monDayCnt * $nomiLvl;
-        $onVac = round(VACUTIL * HPD * VACRATE, 2);
-
-        return round($atWork + $onVac);
-    }
-    return $nomiLvl;
-}
-
-function superRough($rough)
-{
-    $add = 0;
-    foreach ([HLTSI, SOCSI] as $ins) {
-        $add += $ins * $rough;
-    }
-
-    return $rough + $add + STADD;
-}
-
-function taxReal($super)
-{
-    $taxAdvance = TAXRATE * roundUpWhole($super - STADD, 100) - TAXLV;
-    return $taxAdvance > 0
-        ? $taxAdvance
-        : 0;
-}
-
-function pureWage($rough, $tax)
-{
-    return $rough
-        - roundUpWhole(HLTRI * $rough, 1)
-        - roundUpWhole(SOCRI * $rough, 1)
-        - $tax;
-}
-
-function wrapper($nomiLvl, $mon)
-{
-    $a = realRoughWage($mon, $nomiLvl);
-    $b = superRough($a);
-    $c = taxReal($b);
-    $d = pureWage($a, $c);
-    if (DEBUG) {
-        echo "Super rough wage: {$b}" . PHP_EOL;
-        echo "Real rough wage: {$a}" . PHP_EOL;
-        echo "Real tax applied: {$c}" . PHP_EOL;
-        echo "Real pure wage: {$d}" . PHP_EOL;
-        for ($i = 0; $i < 80; $i++) {
-            echo "-";
-        }
-        echo PHP_EOL;
-    }
-
-    return $d;
-}
-
-function roundUpWhole($roundee, $level)
-{
-    $roundeeCnt = (int)($roundee / $level);
-    if ($roundee / $level > $roundeeCnt) {
-        ++$roundeeCnt;
-    }
-
-    return $roundeeCnt * $level;
-}
-
-$actual = wrapper($nomiLvl, $mon);
-$virtual = wrapper($nomiLvl + $rgIncr, $mon);
-echo "Pure wage difference: " . number_format($virtual - $actual, 2, '.', '');
 echo PHP_EOL;
