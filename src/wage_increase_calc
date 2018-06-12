@@ -2,8 +2,7 @@
 <?php
 # Example: ./wage_increase_calc 25000 2000 2018-04 [[[500] 150 1] [DEBUG]]
 if (count($argv) < 4) {
-    echo "Please provide input params!" . PHP_EOL;
-    exit(2);
+    plsHelp($argv[0]);
 }
 include(__DIR__ . '/WageCalc.php');
 
@@ -30,3 +29,29 @@ if (DEBUG) {
     echo $virtual - $actual;
 }
 echo PHP_EOL;
+
+function plsHelp($scriptName) {
+    echo <<<HLP
+usage: {$scriptName} wage-amount increase month [untaxed] [vacation-rate]
+    [vacation-days] [DEBUG]
+
+  wage-amount
+    - salary rounded to whole CZK
+  increase
+    - potential salary raise, in whole CZK
+  month
+    - month of calculation, provide in 'YYYY-MM' format
+  untaxed
+    - amount excluded from tax calculation, various benefits
+  vacation-rate
+    - hourly reward used to calculate wage for time spent on a vacation
+  vacation-days
+    - days spent on a vacation within the month being calculated
+  DEBUG
+    - print calculation details
+
+example: {$scriptName} 25000 2000 2018-04 500 150 1 DEBUG
+HLP;
+    echo PHP_EOL;
+    exit(2);
+}

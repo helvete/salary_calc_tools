@@ -42,16 +42,16 @@ class WageCalc {
             $cache[$month] = $bdCnt;
             if ($this->debug) {
                 echo "Working days: {$bdCnt}" . PHP_EOL;
-                echo "Vacation days: " . $this->vacutil . PHP_EOL;
+                echo "Vacation days: {$this->vacutil}" . PHP_EOL;
+                $this->l();
             }
         }
-
         return $cache[$month];
     }
 
     public function realRoughWage($mon, $nomiLvl) {
         $monDayCnt = $this->daysCnt($mon);
-        for ($i = 0; $i < $this->vacutil;) {
+        for (; 0 < $this->vacutil;) {
             $atWork = ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
             $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
 
@@ -65,7 +65,6 @@ class WageCalc {
         foreach ([self::HLTSI, self::SOCSI] as $ins) {
             $add += $ins * $rough;
         }
-
         return $rough + $add + $this->stadd;
     }
 
@@ -95,12 +94,8 @@ class WageCalc {
             echo "Real rough wage: {$a}" . PHP_EOL;
             echo "Real tax applied: {$c}" . PHP_EOL;
             echo "Real pure wage: {$d}" . PHP_EOL;
-            for ($i = 0; $i < 80; $i++) {
-                echo "-";
-            }
-            echo PHP_EOL;
+            $this->l();
         }
-
         return $d;
     }
 
@@ -109,7 +104,13 @@ class WageCalc {
         if ($roundee / $level > $roundeeCnt) {
             ++$roundeeCnt;
         }
-
         return $roundeeCnt * $level;
+    }
+
+    public function l($cols = 80) {
+        for ($i = 0; $i < $cols; $i++) {
+            echo "-";
+        }
+        echo PHP_EOL;
     }
 }
