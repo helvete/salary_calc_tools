@@ -55,6 +55,11 @@ class WageCalc {
             $atWork = ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
             $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
 
+            if ($this->debug) {
+                echo "Standard mode: {$atWork}" . PHP_EOL;
+                echo "Vacation mode: {$onVac}" . PHP_EOL;
+                $this->l();
+            }
             return round($atWork + $onVac);
         }
         return $nomiLvl;
