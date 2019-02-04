@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+include(__DIR__ . '/Holidays.php');
+
+$h = new helvete\Tools\Holidays((new \DateTime)->format('Y'));
+
+var_dump($h->all());
