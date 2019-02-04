@@ -13,12 +13,20 @@ class WageCalc {
     const HLTRI = 0.045; // health insurance ratio employee
     const SOCRI = 0.065; // social insurance ratio employee
 
+    protected $holidays;
+
     protected $stadd = 0.00;
     protected $vacrate = 0.00;
     protected $vacutil = 0.00;
     protected $debug = 0;
 
-    public function __construct($stadd, $vacrate = 0, $vacutil = 0, $debug = 0) {
+    public function __construct(
+        Holidays $holidays,
+        $stadd,
+        $vacrate = 0,
+        $vacutil = 0,
+        $debug = 0
+    ) {
         foreach (get_defined_vars() as $name => $val) {
             if (property_exists($this, $name)) {
                 $this->$name = $val;
@@ -34,6 +42,8 @@ class WageCalc {
             $end = new \DateTime("${month}-{$start->format('t')}");
             $end = $end->add($oneDay);
             $bdCnt = 0;
+            list(, $mnth) = explode('-', $month);
+            $holThsMon = $this->holidays->monthly((int)$mnth);
             foreach (new \DatePeriod($start, $oneDay, $end) as $d) {
                 if ($d->format('N') < 6) {
                     ++$bdCnt;
@@ -43,12 +53,14 @@ class WageCalc {
             if ($this->debug) {
                 echo "Working days: {$bdCnt}" . PHP_EOL;
                 echo "Vacation days: {$this->vacutil}" . PHP_EOL;
+                echo "Holiday days: " . count($holThsMon) . PHP_EOL;
                 $this->l();
             }
         }
         return $cache[$month];
     }
 
+    // TODO: add logic for correct calculation of holiday rate
     public function realRoughWage($mon, $nomiLvl) {
         $monDayCnt = $this->daysCnt($mon);
         for (; 0 < $this->vacutil;) {

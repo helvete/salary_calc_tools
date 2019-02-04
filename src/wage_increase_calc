@@ -5,6 +5,7 @@ if (count($argv) < 4) {
     plsHelp($argv[0]);
 }
 include(__DIR__ . '/WageCalc.php');
+include(__DIR__ . '/Holidays.php');
 
 $nomiLvl = (int)$argv[1];
 $rgIncr = (int)$argv[2];
@@ -19,7 +20,10 @@ define('VACUTIL', isset($argv[6]) ? (int)$argv[6] : 0);
 // see details of calcualtion
 define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
 
-$calc = new \helvete\Tools\WageCalc(STADD, VACRATE, VACUTIL, DEBUG);
+list($year) = explode('-', $mon);
+
+$hd = new \helvete\Tools\Holidays((int)$year);
+$calc = new \helvete\Tools\WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
 
 $actual = $calc->getDiff($nomiLvl, $mon);
 $virtual = $calc->getDiff($nomiLvl + $rgIncr, $mon);
