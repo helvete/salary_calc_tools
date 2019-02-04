@@ -91,7 +91,7 @@ class Holidays {
             if (!preg_match('/' . static::HPATTERN . '/', $constName)) {
                 continue;
             }
-            list(, $key, $name) = explode('_', $constName);
+            list(, $key) = explode('_', $constName);
             $yearly[(int)$key][] = new \DateTime("{$this->year}-{$constValue}");
         }
 
