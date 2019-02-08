@@ -44,7 +44,7 @@ class Holidays {
     }
 
     /**
-     * TODO: refactor
+     * TODO: refactor, perhaps utilizing https://www.assa.org.au/edm
      */
     protected function calcEaster()
     {
@@ -54,6 +54,8 @@ class Holidays {
         $b = $y % 4;
         $c = $y % 7;
 
+        // for 20. and 21. century only hardcoded consts, see
+        // https://cs.wikipedia.org/wiki/V%C3%BDpo%C4%8Det_data_Velikonoc
         $m = 24;
         $n = 5;
 
