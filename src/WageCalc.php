@@ -63,7 +63,7 @@ class WageCalc {
     // TODO: add logic for correct calculation of holiday rate
     public function realRoughWage($mon, $nomiLvl) {
         $monDayCnt = $this->daysCnt($mon);
-        for (; 0 < $this->vacutil;) {
+        if ($this->vacutil > 0) {
             $atWork = ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
             $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
 
