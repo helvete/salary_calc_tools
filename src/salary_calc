@@ -1,24 +1,23 @@
 #!/usr/bin/env php
 <?php
-# Example: ./wage_increase_calc 25000 2000 2018-04 [[[500] 150 1] [DEBUG]]
-if (count($argv) < 4) {
+# Example: ./wage_increase_calc 25000 2018-04 [[[500] 150 1] [DEBUG]]
+if (count($argv) < 3) {
     plsHelp($argv[0]);
 }
 include(__DIR__ . '/WageCalc.php');
 include(__DIR__ . '/Holidays.php');
 
 $nomiLvl = (int)$argv[1];
-$rgIncr = (int)$argv[2];
-$mon = $argv[3];
+$mon = $argv[2];
 
 // static addition to rough wage
-define('STADD', isset($argv[4]) ? (double)$argv[4] : 0);
+define('STADD', isset($argv[3]) ? (double)$argv[3] : 0);
 // rate per hour @ vacation
-define('VACRATE', isset($argv[5]) ? (double)$argv[5] : 0);
+define('VACRATE', isset($argv[4]) ? (double)$argv[4] : 0);
 // actual vacation utilization
-define('VACUTIL', isset($argv[6]) ? (int)$argv[6] : 0);
+define('VACUTIL', isset($argv[5]) ? (int)$argv[5] : 0);
 // see details of calcualtion
-define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
+define('DEBUG', isset($argv[6]) && $argv[6] == 'DEBUG');
 
 list($year) = explode('-', $mon);
 
@@ -26,23 +25,19 @@ $hd = new \helvete\Tools\Holidays((int)$year);
 $calc = new \helvete\Tools\WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
 
 $actual = $calc->getDiff($nomiLvl, $mon);
-$virtual = $calc->getDiff($nomiLvl + $rgIncr, $mon);
 if (DEBUG) {
-    echo "Pure wage difference: " . number_format($virtual - $actual, 2, '.', '');
+    echo "Pure wage difference: " . number_format($actual, 2, '.', '');
 } else {
-    echo $virtual - $actual;
+    echo $actual;
 }
 echo PHP_EOL;
 
-function plsHelp($scriptName) {
+function plsHelp($sName) {
     echo <<<HLP
-usage: {$scriptName} wage-amount increase month [untaxed] [vacation-rate]
-    [vacation-days] [DEBUG]
+usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days] [DEBUG]
 
   wage-amount
     - salary rounded to whole CZK
-  increase
-    - potential salary raise, in whole CZK
   month
     - month of calculation, provide in 'YYYY-MM' format
   untaxed
@@ -54,7 +49,7 @@ usage: {$scriptName} wage-amount increase month [untaxed] [vacation-rate]
   DEBUG
     - print calculation details
 
-example: {$scriptName} 25000 2000 2018-04 500 150 1 DEBUG
+example: {$sName} 25000 2018-04 500 150 1 DEBUG
 HLP;
     echo PHP_EOL;
     exit(2);
