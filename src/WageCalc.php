@@ -131,4 +131,12 @@ class WageCalc {
         }
         echo PHP_EOL;
     }
+
+    public function setVacutil($vacutil) {
+        $this->vacutil = $vacutil;
+    }
+
+    public function getVacutil() {
+        return $this->vacutil;
+    }
 }
