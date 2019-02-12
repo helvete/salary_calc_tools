@@ -62,10 +62,8 @@ class WageCalc {
 
     public function realRoughWage($mon, $nomiLvl) {
         if ($this->vacutil > 0) {
-            $monDayCnt = $this->daysCnt($mon);
-            $atWork = ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
+            $atWork = $this->woVac($this->daysCnt($mon), $nomiLvl);
             $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
-
             if ($this->debug) {
                 echo "Standard mode: {$atWork}" . PHP_EOL;
                 echo "Vacation mode: {$onVac}" . PHP_EOL;
@@ -74,6 +72,10 @@ class WageCalc {
             return round($atWork + $onVac);
         }
         return $nomiLvl;
+    }
+
+    public function woVac($monDayCnt, $nomiLvl) {
+         return ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
     }
 
     public function superRough($rough) {
