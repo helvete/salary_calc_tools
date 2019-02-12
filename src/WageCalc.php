@@ -83,13 +83,11 @@ class WageCalc {
         foreach ([self::HLTSI, self::SOCSI] as $ins) {
             $add += $ins * $rough;
         }
-        return $rough + $add + $this->stadd;
+        return $rough + $add;
     }
 
     public function taxReal($s) {
-        $taxAdvance = self::TAXRATE
-            * $this->ruw($s - $this->stadd, 100)
-            - self::TAXLV;
+        $taxAdvance = self::TAXRATE * $this->ruw($s, 100) - self::TAXLV;
         return $taxAdvance > 0
             ? $taxAdvance
             : 0;
@@ -108,10 +106,12 @@ class WageCalc {
         $c = $this->taxReal($b);
         $d = $this->pureWage($a, $c);
         if ($this->debug) {
+            echo "Total employer cost: " . ($b + $this->stadd) . PHP_EOL;
             echo "Super rough wage: {$b}" . PHP_EOL;
             echo "Real rough wage: {$a}" . PHP_EOL;
             echo "Real tax applied: {$c}" . PHP_EOL;
             echo "Real pure wage: {$d}" . PHP_EOL;
+            echo "Taxes effectively: " . round((1 - $d / $b) * 100) . '%' . PHP_EOL;
             $this->l();
         }
         return $d;
