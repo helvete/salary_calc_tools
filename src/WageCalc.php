@@ -60,7 +60,6 @@ class WageCalc {
         return $cache[$month];
     }
 
-    // TODO: add logic for correct calculation of holiday rate
     public function realRoughWage($mon, $nomiLvl) {
         if ($this->vacutil > 0) {
             $monDayCnt = $this->daysCnt($mon);
