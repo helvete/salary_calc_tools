@@ -1,11 +1,14 @@
 #!/usr/bin/env php
 <?php
+
+namespace helvete\Tools;
+
 # Example: ./wage_increase_calc 25000 2018-04 [[[500] 150 1] [DEBUG]]
 if (count($argv) < 3) {
     plsHelp($argv[0]);
 }
-include(__DIR__ . '/WageCalc.php');
-include(__DIR__ . '/Holidays.php');
+include(__DIR__ . '/Tools/WageCalc.php');
+include(__DIR__ . '/Tools/Holidays.php');
 
 $nomiLvl = (int)$argv[1];
 $mon = $argv[2];
@@ -21,8 +24,8 @@ define('DEBUG', isset($argv[6]) && $argv[6] == 'DEBUG');
 
 list($year) = explode('-', $mon);
 
-$hd = new \helvete\Tools\Holidays((int)$year);
-$calc = new \helvete\Tools\WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
+$hd = new Holidays((int)$year);
+$calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
 
 $actual = $calc->getDiff($nomiLvl, $mon);
 if (DEBUG) {
