@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+
+namespace helvete\Tools;
+
+if (count($argv) < 2) {
+    exit(2);
+}
+include(__DIR__ . '/Tools/WageCalc.php');
+include(__DIR__ . '/Tools/Holidays.php');
+
+// monthly tariff salary
+define('TARIFF', isset($argv[1]) ? (double)$argv[1] : 0);
+// year which the calculation is to regard
+define('YEAR', isset($argv[2]) ? (int)$argv[2] : (new \DateTime)->format('Y'));
+
+$hd = new Holidays(YEAR);
+$calc = new WageCalc($hd, 0);
+
+// initial rate per hour @ vacation (from last year)
+define('VACRATE', isset($argv[3]) && (int)$argv[3] > 0
+    ? (double)$argv[3]
+    : vacRate($calc, quarterStart(YEAR - 1, 3))
+);
+
+$qrtrs = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [10, 11, 12],
+];
+
+$year = $hd::init();
+foreach ($qrtrs as $quarter => $months) {
+    $rate = $quarter
+        ? vacRate($calc, quarterStart(YEAR, --$quarter))
+        : VACRATE;
+    foreach ($months as $month) {
+        $year[$month] = $rate;
+    }
+}
+// TODO
+var_dump($year);
+exit;
+
+function vacRate(WageCalc $calc, \DateTime $token) {
+    for ($hours = 0, $i = 0; $i < 3; $i++, $token->add(new \DateInterval('P1M'))) {
+        $hours += $calc->daysCnt($token->format('Y-m')) * WageCalc::HPD;
+    }
+    return 3 * TARIFF / $hours;
+}
+
+function quarterStart($year, $quarter) {
+    if (!in_array($quarter, range(0, 3))) {
+        throw new \InvalidArgumentException('Incorrect input provided!');
+    }
+    $mon = 3 * $quarter + 1;
+    return new \DateTime("{$year}-{$mon}-01");
+}
