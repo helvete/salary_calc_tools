@@ -4,6 +4,8 @@
 namespace helvete\Tools;
 
 if (count($argv) < 2) {
+    echo "ERROR: run {$argv[0]} <tariff> [<year=current>] [<vacrate=default>]\n";
+    echo "Example:   {$argv[0]} 25000 2019 150\n";
     exit(2);
 }
 include(__DIR__ . '/Tools/WageCalc.php');
@@ -20,7 +22,7 @@ $calc = new WageCalc($hd, 0);
 // initial rate per hour @ vacation (from last year)
 define('VACRATE', isset($argv[3]) && (int)$argv[3] > 0
     ? (double)$argv[3]
-    : vacRate($calc, quarterStart(YEAR - 1, 3))
+    : vacRate($calc, quarterStart(YEAR - 1, 3), vacutil())
 );
 
 $qrtrs = [
@@ -30,24 +32,27 @@ $qrtrs = [
     [10, 11, 12],
 ];
 
-$year = $hd::init();
+$year = $default = $hd::init();
 foreach ($qrtrs as $quarter => $months) {
     $rate = $quarter
-        ? vacRate($calc, quarterStart(YEAR, --$quarter))
+        ? vacRate($calc, quarterStart(YEAR, --$quarter), vacutil())
         : VACRATE;
     foreach ($months as $month) {
-        $year[$month] = $rate;
+        $default[$month] = $rate;
     }
 }
 // TODO
-var_dump($year);
+var_dump($default, $year);
+var_dump(vacRate($calc, quarterStart(YEAR, 3), vacutil(5, 0, 0)));
 exit;
 
-function vacRate(WageCalc $calc, \DateTime $token) {
-    for ($hours = 0, $i = 0; $i < 3; $i++, $token->add(new \DateInterval('P1M'))) {
-        $hours += $calc->daysCnt($token->format('Y-m')) * WageCalc::HPD;
+function vacRate(WageCalc $calc, \DateTime $token, array $vu) {
+    for ($hrs = 0, $i = 0; $i < 3; $i++, $token->add(new \DateInterval('P1M'))) {
+        $dc = $calc->daysCnt($token->format('Y-m'));
+        $hrs += ($dc - $vu[$i]) * WageCalc::HPD;
+        $sum[$i] = TARIFF * (1 - ($vu[$i] / $dc));
     }
-    return 3 * TARIFF / $hours;
+    return array_sum($sum) / $hrs;
 }
 
 function quarterStart($year, $quarter) {
@@ -56,4 +61,8 @@ function quarterStart($year, $quarter) {
     }
     $mon = 3 * $quarter + 1;
     return new \DateTime("{$year}-{$mon}-01");
+}
+
+function vacutil($v0 = 0, $v1 = 0, $v2 = 0) {
+    return [$v0, $v1, $v2];
 }
