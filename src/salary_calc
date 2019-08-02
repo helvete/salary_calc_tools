@@ -29,7 +29,7 @@ $calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
 
 $actual = $calc->getDiff($nomiLvl, $mon);
 if (DEBUG) {
-    echo "Pure wage difference: " . number_format($actual, 2, '.', '');
+    echo "Pure wage: " . number_format($actual, 2, '.', '');
 } else {
     echo $actual;
 }
