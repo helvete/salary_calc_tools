@@ -9,7 +9,7 @@ class WageCalc {
     const TAXRATE = 0.15; // global tax rate
     const TAXLV = 2070; // tax leave monthly absolute (up to)
     const HLTSI = 0.09; // health insurance ratio employer
-    const SOCSI = 0.25; // social insurance ratio employer
+    const SOCSI = 0.248; // social insurance ratio employer
     const HLTRI = 0.045; // health insurance ratio employee
     const SOCRI = 0.065; // social insurance ratio employee
 
