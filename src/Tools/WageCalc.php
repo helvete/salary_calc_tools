@@ -87,7 +87,7 @@ class WageCalc {
     }
 
     public function taxReal($s) {
-        $taxAdvance = self::TAXRATE * $this->ruw($s, 100) - self::TAXLV;
+        $taxAdvance = self::TAXRATE * static::ruw($s, 100) - self::TAXLV;
         return $taxAdvance > 0
             ? $taxAdvance
             : 0;
@@ -95,8 +95,8 @@ class WageCalc {
 
     public function pureWage($rough, $tax) {
         return $rough
-            - $this->ruw(self::HLTRI * $rough, 1)
-            - $this->ruw(self::SOCRI * $rough, 1)
+            - static::ruw(self::HLTRI * $rough, 1)
+            - static::ruw(self::SOCRI * $rough, 1)
             - $tax;
     }
 
@@ -117,7 +117,7 @@ class WageCalc {
         return $d;
     }
 
-    public function ruw($roundee, $level) {
+    static public function ruw($roundee, $level) {
         $roundeeCnt = (int)($roundee / $level);
         if ($roundee / $level > $roundeeCnt) {
             ++$roundeeCnt;

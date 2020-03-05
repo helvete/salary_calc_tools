@@ -18,7 +18,7 @@ define('STADD', isset($argv[3]) ? (double)$argv[3] : 0);
 // rate per hour @ vacation
 define('VACRATE', isset($argv[4]) ? (double)$argv[4] : 0);
 // actual vacation utilization
-define('VACUTIL', isset($argv[5]) ? (int)$argv[5] : 0);
+define('VACUTIL', isset($argv[5]) ? WageCalc::ruw($argv[5], 0.5) : 0);
 // see details of calcualtion
 define('DEBUG', isset($argv[6]) && $argv[6] == 'DEBUG');
 
