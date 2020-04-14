@@ -12,6 +12,7 @@ class WageCalc {
     const SOCSI = 0.248; // social insurance ratio employer
     const HLTRI = 0.045; // health insurance ratio employee
     const SOCRI = 0.065; // social insurance ratio employee
+    const OTRATE = 0.25;
 
     protected $holidays;
 
@@ -19,18 +20,23 @@ class WageCalc {
     protected $vacrate = 0.00;
     protected $vacutil = 0.00;
     protected $debug = 0;
+    protected $ot = 0;
 
     public function __construct(
         Holidays $holidays,
         $stadd,
         $vacrate = 0,
         $vacutil = 0,
-        $debug = 0
+        $debug = 0,
+        $ot = 0
     ) {
         foreach (get_defined_vars() as $name => $val) {
             if (property_exists($this, $name)) {
                 $this->$name = $val;
             }
+        }
+        if ($this->ot && !$this->vacrate) {
+            throw new \InvalidArgumentException();
         }
     }
 
@@ -61,9 +67,22 @@ class WageCalc {
     }
 
     public function realRoughWage($mon, $nomiLvl) {
-        if ($this->vacutil > 0) {
-            $atWork = $this->woVac($this->daysCnt($mon), $nomiLvl);
+        if ($this->vacutil > 0 || $this->ot > 0) {
+            $daysCnt = $this->daysCnt($mon);
+            $atWork = $this->woVac($daysCnt, $nomiLvl);
             $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
+            if ($this->ot) {
+                $htMon = $nomiLvl / (static::HPD * $daysCnt);
+                $otRate = $this->ruw($htMon * $this->ot, 1);
+                $otBonus = $this->ruw(static::OTRATE * $this->ot * $this->vacrate, 1);
+                if ($this->debug) {
+                    echo "Overtime base: {$otRate}" . PHP_EOL;
+                    echo "Overtime bonus: {$otBonus}" . PHP_EOL;
+                }
+                $atWork += $otRate + $otBonus;
+            }
+            $atWork = $this->ruw($atWork, 1);
+
             if ($this->debug) {
                 echo "Standard mode: {$atWork}" . PHP_EOL;
                 echo "Vacation mode: {$onVac}" . PHP_EOL;

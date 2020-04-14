@@ -19,13 +19,20 @@ define('STADD', isset($argv[3]) ? (double)$argv[3] : 0);
 define('VACRATE', isset($argv[4]) ? (double)$argv[4] : 0);
 // actual vacation utilization
 define('VACUTIL', isset($argv[5]) ? WageCalc::ruw($argv[5], 0.5) : 0);
+// overtime
+define('OVERTIME', isset($argv[6]) ? (double)$argv[6] : 0);
 // see details of calcualtion
-define('DEBUG', isset($argv[6]) && $argv[6] == 'DEBUG');
+define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
 
 list($year) = explode('-', $mon);
 
 $hd = new Holidays((int)$year);
-$calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG);
+try {
+    $calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG, OVERTIME);
+} catch (\InvalidArgumentException $e) {
+    echo "ERROR: vacation-rate has to be provided in case of overtime-hours" . PHP_EOL;
+    exit(3);
+}
 
 $actual = $calc->getDiff($nomiLvl, $mon);
 if (DEBUG) {
@@ -37,7 +44,8 @@ echo PHP_EOL;
 
 function plsHelp($sName) {
     echo <<<HLP
-usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days] [DEBUG]
+usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days]
+    [overtime-hours] [DEBUG]
 
   wage-amount
     - salary rounded to whole CZK
@@ -49,10 +57,12 @@ usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days] [DEB
     - hourly reward used to calculate wage for time spent on a vacation
   vacation-days
     - days spent on a vacation within the month being calculated
+  overtime-hours
+    - number of overtime hours worked
   DEBUG
     - print calculation details
 
-example: {$sName} 25000 2018-04 500 150 1 DEBUG
+example: {$sName} 25000 2018-04 500 150 1 18 DEBUG
 HLP;
     echo PHP_EOL;
     exit(2);
