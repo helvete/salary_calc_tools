@@ -125,6 +125,7 @@ class WageCalc {
         $c = $this->taxReal($b);
         $d = $this->pureWage($a, $c);
         if ($this->debug) {
+            $b = static::ruw($b, 1);
             echo "Total employer cost: " . ($b + $this->stadd) . PHP_EOL;
             echo "Super rough wage: {$b}" . PHP_EOL;
             echo "Real rough wage: {$a}" . PHP_EOL;
