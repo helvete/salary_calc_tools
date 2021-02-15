@@ -7,7 +7,7 @@ class WageCalc {
     const DAY = 'P1D'; // 1-day interval
     const HPD = 8; // hours-per-working-day official
     const TAXRATE = 0.15; // global tax rate
-    const TAXLV = 2070; // tax leave monthly absolute (up to)
+    const TAXLV = 2320; // tax leave monthly absolute (up to)
     const HLTSI = 0.09; // health insurance ratio employer
     const SOCSI = 0.248; // social insurance ratio employer
     const HLTRI = 0.045; // health insurance ratio employee
@@ -97,7 +97,7 @@ class WageCalc {
          return ($monDayCnt - $this->vacutil) / $monDayCnt * $nomiLvl;
     }
 
-    public function superRough($rough) {
+    public function employerBase($rough) {
         $add = 0;
         foreach ([self::HLTSI, self::SOCSI] as $ins) {
             $add += $ins * $rough;
@@ -121,13 +121,12 @@ class WageCalc {
 
     public function getDiff($nomiLvl, $mon) {
         $a = $this->realRoughWage($mon, $nomiLvl);
-        $b = $this->superRough($a);
-        $c = $this->taxReal($b);
+        $b = $this->employerBase($a);
+        $c = $this->taxReal($a);
         $d = $this->pureWage($a, $c);
         if ($this->debug) {
             $b = static::ruw($b, 1);
             echo "Total employer cost: " . ($b + $this->stadd) . PHP_EOL;
-            echo "Super rough wage: {$b}" . PHP_EOL;
             echo "Real rough wage: {$a}" . PHP_EOL;
             echo "Real tax applied: {$c}" . PHP_EOL;
             echo "Real pure wage: {$d}" . PHP_EOL;
