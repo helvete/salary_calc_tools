@@ -7,7 +7,7 @@ class WageCalc {
     const DAY = 'P1D'; // 1-day interval
     const HPD = 8; // hours-per-working-day official
     const TAXRATE = 0.15; // global tax rate
-    const TAXLV = 2320; // tax leave monthly absolute (up to)
+    const TAXLV = 2570; // tax leave monthly absolute (up to)
     const HLTSI = 0.09; // health insurance ratio employer
     const SOCSI = 0.248; // social insurance ratio employer
     const HLTRI = 0.045; // health insurance ratio employee
