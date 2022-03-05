@@ -1,0 +1,7 @@
+{
+	"name": "helvete/wage-calc",
+	"description": "Wage calc utils",
+	"license": ["GPL-2.0"],
+	"authors": [{"name": "helvete"}],
+	"bin": ["./src/salary_calc"]
+}
