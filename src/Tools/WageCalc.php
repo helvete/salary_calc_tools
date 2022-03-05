@@ -21,6 +21,7 @@ class WageCalc {
     protected $vacutil = 0.00;
     protected $debug = 0;
     protected $ot = 0;
+    protected $debugStack = [];
 
     public function __construct(
         Holidays $holidays,
@@ -57,10 +58,9 @@ class WageCalc {
             }
             $cache[$month] = $bdCnt;
             if ($this->debug) {
-                echo "Working days: {$bdCnt}" . PHP_EOL;
-                echo "Vacation days: {$this->vacutil}" . PHP_EOL;
-                echo "Holiday days: " . count($holThsMon) . PHP_EOL;
-                $this->l();
+                $this->debugStack["Working days: %s"] = $bdCnt;
+                $this->debugStack["Vacation days: %s"] = $this->vacutil;
+                $this->debugStack["Holiday days: %s"] = count($holThsMon);
             }
         }
         return $cache[$month];
@@ -77,17 +77,16 @@ class WageCalc {
                 $otRate = $this->ruw($htMon * $this->ot, 1);
                 $otBonus = $this->ruw(static::OTRATE * $this->ot * $this->vacrate, 1);
                 if ($this->debug) {
-                    echo "Overtime base: {$otRate}" . PHP_EOL;
-                    echo "Overtime bonus: {$otBonus}" . PHP_EOL;
+                    $this->debugStack["Overtime base: %s"] = $otRate;
+                    $this->debugStack["Overtime bonus: %s"] = $otBonus;
                 }
                 $atWork += $otRate + $otBonus;
             }
             $atWork = $this->ruw($atWork, 1);
 
             if ($this->debug) {
-                echo "Standard mode: {$atWork}" . PHP_EOL;
-                echo "Vacation mode: {$onVac}" . PHP_EOL;
-                $this->l();
+                $this->debugStack["Standard mode: %s"] = $atWork;
+                $this->debugStack["Vacation mode: %s"] = $onVac;
             }
             return round($atWork + $onVac);
         }
@@ -127,12 +126,11 @@ class WageCalc {
         $d = $this->pureWage($a, $c);
         if ($this->debug) {
             $b = static::ruw($b, 1);
-            echo "Total employer cost: " . ($b + $this->stadd) . PHP_EOL;
-            echo "Real rough wage: {$a}" . PHP_EOL;
-            echo "Real tax applied: {$c}" . PHP_EOL;
-            echo "Real pure wage: {$d}" . PHP_EOL;
-            echo "Taxes effectively: " . round((1 - $d / $b) * 100) . '%' . PHP_EOL;
-            $this->l();
+            $this->debugStack["Total employer cost: %s"] = $b + $this->stadd;
+            $this->debugStack["Real rough wage: %s"] = $a;
+            $this->debugStack["Real tax applied: %s"] = $c;
+            $this->debugStack["Real pure wage: %s"] = $d;
+            $this->debugStack["Taxes effectively: %s"] = round((1 - $d / $b) * 100) . '%';
         }
         return $d;
     }
@@ -145,18 +143,15 @@ class WageCalc {
         return $roundeeCnt * $level;
     }
 
-    public function l($cols = 80) {
-        for ($i = 0; $i < $cols; $i++) {
-            echo "-";
-        }
-        echo PHP_EOL;
-    }
-
     public function setVacutil($vacutil) {
         $this->vacutil = $vacutil;
     }
 
     public function getVacutil() {
         return $this->vacutil;
+    }
+
+    public function getDebugStack() {
+        return $this->debugStack;
     }
 }

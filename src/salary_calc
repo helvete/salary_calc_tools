@@ -36,6 +36,9 @@ try {
 
 $actual = $calc->getDiff($nomiLvl, $mon);
 if (DEBUG) {
+    foreach ($calc->getDebugStack() as $tpl => $val) {
+        echo sprintf($tpl, $val) . PHP_EOL;
+    }
     echo "Pure wage: " . number_format($actual, 2, '.', '');
 } else {
     echo $actual;
