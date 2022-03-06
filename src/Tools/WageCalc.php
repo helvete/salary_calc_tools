@@ -48,7 +48,14 @@ class WageCalc {
         static $cache;
         if (empty($cache[$month])) {
             $oneDay = new \DateInterval(self::DAY);
-            $start = new \DateTime("${month}-01");
+            try {
+                $start = new \DateTime("${month}-01");
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException(sprintf(
+                    "invalid yearmonth input: %s",
+                    $month
+                ));
+            }
             $end = new \DateTime("${month}-{$start->format('t')}");
             $end = $end->add($oneDay);
             $bdCnt = 0;
