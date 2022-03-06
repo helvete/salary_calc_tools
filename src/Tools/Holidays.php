@@ -23,7 +23,9 @@ class Holidays {
     public function __construct($year) {
         $y = \DateTime::createFromFormat('Y', $year);
         if (!$y) {
-            throw new \InvalidArgumentException('Inst input not valid!');
+            throw new \InvalidArgumentException(
+                sprintf('invalid input %s', $year)
+            );
         }
         $this->year = $year;
     }

@@ -37,7 +37,10 @@ class WageCalc {
             }
         }
         if ($this->ot && !$this->vacrate) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException(implode(',', [
+                $this->ot,
+                $this->vacrate,
+            ]));
         }
     }
 
