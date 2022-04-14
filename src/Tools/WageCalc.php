@@ -80,8 +80,7 @@ class WageCalc {
         if ($this->vacutil > 0 || $this->ot > 0) {
             $daysCnt = $this->daysCnt($mon);
             $atWork = $this->woVac($daysCnt, $nomiLvl);
-            // TODO DEBUG: is this OK?
-            $onVac = floor($this->vacutil * self::HPD * $this->vacrate);
+            $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
             if ($this->ot) {
                 $htMon = $nomiLvl / (static::HPD * $daysCnt);
                 $otRate = $this->ruw($htMon * $this->ot, 1);
