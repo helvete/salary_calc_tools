@@ -80,14 +80,14 @@ class WageCalc {
         if ($this->vacutil > 0 || $this->ot > 0) {
             $daysCnt = $this->daysCnt($mon);
             $atWork = $this->woVac($daysCnt, $nomiLvl);
-            $onVac = round($this->vacutil * self::HPD * $this->vacrate, 2);
+            $onVac = $this->ruw($this->vacutil * self::HPD * $this->vacrate, 1);
             if ($this->ot) {
                 $htMon = $nomiLvl / (static::HPD * $daysCnt);
-                $otRate = $this->ruw($htMon * $this->ot, 1);
-                $otBonus = $this->ruw(static::OTRATE * $this->ot * $this->vacrate, 1);
+                $otRate = $htMon * $this->ot;
+                $otBonus = static::OTRATE * $this->ot * $this->vacrate;
                 if ($this->debug) {
-                    $this->debugStack["Overtime base: %s"] = $otRate;
-                    $this->debugStack["Overtime bonus: %s"] = $otBonus;
+                    $this->debugStack["Overtime base: %s"] = round($otRate, 1);
+                    $this->debugStack["Overtime bonus: %s"] = round($otBonus, 1);
                 }
                 $atWork += $otRate + $otBonus;
             }
