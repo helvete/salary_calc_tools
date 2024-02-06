@@ -12,6 +12,7 @@ class WageCalc {
     const SOCSI = 0.248; // social insurance ratio employer
     const HLTRI = 0.045; // health insurance ratio employee
     const SOCRI = 0.065; // social insurance ratio employee
+    const ILLRI = 0.006; // sickness insurance ratio employee
     const OTRATE = 0.25;
 
     protected $holidays;
@@ -122,9 +123,18 @@ class WageCalc {
     }
 
     public function pureWage($rough, $tax) {
+        $hltri = static::ruw(self::HLTRI * $rough, 1);
+        $socri = static::ruw(self::SOCRI * $rough, 1);
+        $illri = static::ruw(self::ILLRI * $rough, 1);
+        if ($this->debug) {
+            $this->debugStack[" > Health insurance: %s"] = $hltri;
+            $this->debugStack[" > Social insurance: %s"] = $socri;
+            $this->debugStack[" > Sickness insurance: %s"] = $illri;
+        }
         return $rough
-            - static::ruw(self::HLTRI * $rough, 1)
-            - static::ruw(self::SOCRI * $rough, 1)
+            - $hltri
+            - $socri
+            - $illri
             - $tax;
     }
 
@@ -132,12 +142,14 @@ class WageCalc {
         $a = $this->realRoughWage($mon, $nomiLvl);
         $b = $this->employerBase($a);
         $c = $this->taxReal($a);
-        $d = $this->pureWage($a, $c);
         if ($this->debug) {
             $b = static::ruw($b, 1);
             $this->debugStack["Total employer cost: %s"] = $b + $this->stadd;
             $this->debugStack["Real rough wage: %s"] = $a;
             $this->debugStack["Real tax applied: %s"] = $c;
+        }
+        $d = $this->pureWage($a, $c);
+        if ($this->debug) {
             $this->debugStack["Real pure wage: %s"] = $d;
             $this->debugStack["Taxes effectively: %s"] = round((1 - $d / $b) * 100) . '%';
         }
