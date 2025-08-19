@@ -15,6 +15,10 @@ class WageCalc {
     const ILLRI = 0.006; // sickness insurance ratio employee
     const OTRATE = 0.25;
 
+    const DISCOUNT_CHILD_1 = 1267;
+    const DISCOUNT_CHILD_2 = 1860;
+    const DISCOUNT_CHILD_3 = 2320;
+
     protected $holidays;
 
     protected $stadd = 0.00;
@@ -22,6 +26,7 @@ class WageCalc {
     protected $vacutil = 0.00;
     protected $debug = 0;
     protected $ot = 0;
+    protected $childCnt = 0;
     protected $debugStack = [];
 
     public function __construct(
@@ -30,7 +35,8 @@ class WageCalc {
         $vacrate = 0,
         $vacutil = 0,
         $debug = 0,
-        $ot = 0
+        $ot = 0,
+        $childCnt = 0,
     ) {
         foreach (get_defined_vars() as $name => $val) {
             if (property_exists($this, $name)) {
@@ -116,10 +122,25 @@ class WageCalc {
     }
 
     public function taxReal($s) {
-        $taxAdvance = self::TAXRATE * static::ruw($s, 100) - self::TAXLV;
+        $taxAdvance = self::TAXRATE * static::ruw($s, 100)
+            - self::TAXLV
+            - $this->taxLeaveChildren();
         return $taxAdvance > 0
             ? $taxAdvance
             : 0;
+    }
+
+    public function taxLeaveChildren() {
+        $leave = $this->childCnt > 2
+            ? ($this->childCnt - 2) * self::DISCOUNT_CHILD_3
+            : 0;
+        if ($this->childCnt > 1)
+            $leave += self::DISCOUNT_CHILD_2;
+        if ($this->childCnt > 0)
+            $leave += self::DISCOUNT_CHILD_1;
+        if ($leave > 0)
+            $this->debugStack["Children tax discount: %s"] = $leave;
+        return $leave;
     }
 
     public function pureWage($rough, $tax) {

@@ -21,14 +21,16 @@ define('VACRATE', isset($argv[4]) ? (double)$argv[4] : 0);
 define('VACUTIL', isset($argv[5]) ? WageCalc::ruw($argv[5], 0.5) : 0);
 // overtime
 define('OVERTIME', isset($argv[6]) ? (double)$argv[6] : 0);
+// children count
+define('CHILDREN', isset($argv[7]) ? (int)$argv[7] : 0);
 // see details of calcualtion
-define('DEBUG', isset($argv[7]) && $argv[7] == 'DEBUG');
+define('DEBUG', isset($argv[8]) && $argv[8] == 'DEBUG');
 
 list($year) = explode('-', $mon);
 
 $hd = new Holidays((int)$year);
 try {
-    $calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG, OVERTIME);
+    $calc = new WageCalc($hd, STADD, VACRATE, VACUTIL, DEBUG, OVERTIME, CHILDREN);
 } catch (\InvalidArgumentException $e) {
     echo "ERROR: vacation-rate has to be provided in case of overtime-hours" . PHP_EOL;
     exit(3);
@@ -48,7 +50,7 @@ echo PHP_EOL;
 function plsHelp($sName) {
     echo <<<HLP
 usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days]
-    [overtime-hours] [DEBUG]
+    [overtime-hours] [children-count] [DEBUG]
 
   wage-amount
     - salary rounded to whole CZK
@@ -62,6 +64,8 @@ usage: {$sName} wage-amount month [untaxed] [vacation-rate] [vacation-days]
     - days spent on a vacation within the month being calculated
   overtime-hours
     - number of overtime hours worked
+  children-count
+    - number of children for tax discount calculation
   DEBUG
     - print calculation details
 
